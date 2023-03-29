@@ -47,6 +47,22 @@ func (l *zerologLogger) SetLevel(level Level) {
 	}
 }
 
+func (l *zerologLogger) Writer(level Level) io.Writer {
+	switch level {
+	case DebugLevel:
+		return newZerologWriter(l.logger.Debug())
+	case WarnLevel:
+		return newZerologWriter(l.logger.Warn())
+	case ErrorLevel:
+		return newZerologWriter(l.logger.Error())
+	case FatalLevel:
+		return newZerologWriter(l.logger.Fatal())
+	default:
+		return newZerologWriter(l.logger.Info())
+	}
+
+}
+
 func (l *zerologLogger) Trace() LoggerInstance {
 	return newZerologInstance(l.logger.Trace())
 }
@@ -156,4 +172,22 @@ func (l *zerologInstance) Write(args ...any) {
 
 func (l *zerologInstance) Writef(format string, args ...any) {
 	l.logger.Msgf(format, args...)
+}
+
+type zerologWriter struct {
+	logger *zerolog.Event
+}
+
+func newZerologWriter(logger *zerolog.Event) *zerologWriter {
+	return &zerologWriter{}
+}
+
+func (w *zerologWriter) Write(p []byte) (n int, err error) {
+	n = len(p)
+	if n > 0 && p[n-1] == '\n' {
+		// Trim CR added by stdlog.
+		p = p[0 : n-1]
+	}
+	w.logger.CallerSkipFrame(1).Msg(string(p))
+	return
 }

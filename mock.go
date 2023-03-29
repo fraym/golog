@@ -10,14 +10,20 @@ type MockLogger struct {
 	mock.Mock
 }
 
-// @todo: implement Logger and add test
-
 func (l *MockLogger) SetLevel(level Level) {
 	l.Called(level)
 }
 
 func (l *MockLogger) SetOutput(output io.Writer) {
 	l.Called(output)
+}
+
+func (l *MockLogger) Writer(level Level) io.Writer {
+	args := l.Called(level)
+	if args.Get(0) == nil {
+		return nil
+	}
+	return args.Get(0).(io.Writer)
 }
 
 func (l *MockLogger) Trace() LoggerInstance {

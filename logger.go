@@ -16,6 +16,7 @@ const (
 type Logger interface {
 	SetLevel(level Level)
 	SetOutput(output io.Writer)
+	Writer(level Level) io.Writer
 	Trace() LoggerInstance
 	WriteTrace(args ...any)
 	WriteTracef(format string, args ...any)

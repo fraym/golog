@@ -27,18 +27,26 @@ func (l *logrusLogger) SetOutput(output io.Writer) {
 }
 
 func (l *logrusLogger) SetLevel(level Level) {
+	l.logger.SetLevel(getLogrusLevel(level))
+}
+
+func getLogrusLevel(level Level) logrus.Level {
 	switch level {
 	case DebugLevel:
-		l.logger.SetLevel(logrus.DebugLevel)
+		return logrus.DebugLevel
 	case WarnLevel:
-		l.logger.SetLevel(logrus.WarnLevel)
+		return logrus.WarnLevel
 	case ErrorLevel:
-		l.logger.SetLevel(logrus.ErrorLevel)
+		return logrus.ErrorLevel
 	case FatalLevel:
-		l.logger.SetLevel(logrus.FatalLevel)
+		return logrus.FatalLevel
 	default:
-		l.logger.SetLevel(logrus.InfoLevel)
+		return logrus.InfoLevel
 	}
+}
+
+func (l *logrusLogger) Writer(level Level) io.Writer {
+	return l.logger.WriterLevel(getLogrusLevel(level))
 }
 
 func (l *logrusLogger) Trace() LoggerInstance {
