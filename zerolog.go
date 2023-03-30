@@ -179,7 +179,9 @@ type zerologWriter struct {
 }
 
 func newZerologWriter(logger *zerolog.Event) *zerologWriter {
-	return &zerologWriter{}
+	return &zerologWriter{
+		logger: logger,
+	}
 }
 
 func (w *zerologWriter) Write(p []byte) (n int, err error) {
@@ -188,6 +190,7 @@ func (w *zerologWriter) Write(p []byte) (n int, err error) {
 		// Trim CR added by stdlog.
 		p = p[0 : n-1]
 	}
+
 	w.logger.CallerSkipFrame(1).Msg(string(p))
 	return
 }
