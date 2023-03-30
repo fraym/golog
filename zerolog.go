@@ -48,19 +48,7 @@ func (l *zerologLogger) SetLevel(level Level) {
 }
 
 func (l *zerologLogger) Writer(level Level) io.Writer {
-	switch level {
-	case DebugLevel:
-		return newZerologWriter(l.logger.Debug())
-	case WarnLevel:
-		return newZerologWriter(l.logger.Warn())
-	case ErrorLevel:
-		return newZerologWriter(l.logger.Error())
-	case FatalLevel:
-		return newZerologWriter(l.logger.Fatal())
-	default:
-		return newZerologWriter(l.logger.Info())
-	}
-
+	return newZerologWriter(l.logger, level)
 }
 
 func (l *zerologLogger) Trace() LoggerInstance {
@@ -175,12 +163,14 @@ func (l *zerologInstance) Writef(format string, args ...any) {
 }
 
 type zerologWriter struct {
-	logger *zerolog.Event
+	logger *zerolog.Logger
+	level  Level
 }
 
-func newZerologWriter(logger *zerolog.Event) *zerologWriter {
+func newZerologWriter(logger *zerolog.Logger, level Level) *zerologWriter {
 	return &zerologWriter{
 		logger: logger,
+		level:  level,
 	}
 }
 
@@ -191,6 +181,20 @@ func (w *zerologWriter) Write(p []byte) (n int, err error) {
 		p = p[0 : n-1]
 	}
 
-	w.logger.CallerSkipFrame(1).Msg(string(p))
+	var event *zerolog.Event
+
+	switch w.level {
+	case DebugLevel:
+		event = w.logger.Debug()
+	case WarnLevel:
+		event = w.logger.Warn()
+	case ErrorLevel:
+		event = w.logger.Error()
+	case FatalLevel:
+		event = w.logger.Fatal()
+	default:
+		event = w.logger.Info()
+	}
+	event.CallerSkipFrame(1).Msg(string(p))
 	return
 }

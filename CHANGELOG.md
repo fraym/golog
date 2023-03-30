@@ -1,3 +1,7 @@
+# v0.2.2
+
+- (bug) Fix `Writer` function for zerolog
+
 # v0.2.1
 
 - (bug) Fix `Writer` function for zerolog
